@@ -57,7 +57,7 @@ public static class FindReferences
         String metaPath = path + _metaExtension;
 
         List<String> references = new List<String>();
-        StringBuilder output = new StringBuilder();
+        StringBuilder errors = new StringBuilder();
 
         Double totalTime = RunProcess();
         Output();
@@ -140,10 +140,8 @@ public static class FindReferences
 
         void ErrorDataReceived(System.Object sender, DataReceivedEventArgs eventArgs)
         {
-            if (String.IsNullOrEmpty(eventArgs.Data))
-                return;
-
-            output.AppendLine($"Error: {eventArgs.Data}");
+            if (String.IsNullOrEmpty(eventArgs.Data) == false)
+                errors.AppendLine($"Error: {eventArgs.Data}");
         }
 
         void Output()
@@ -151,23 +149,24 @@ public static class FindReferences
             foreach (String reference in references)
             {
                 String refGuid = AssetDatabase.AssetPathToGUID(reference);
-                output.AppendLine($"{refGuid}: {reference}");
 
                 String file = reference;
 
                 if (reference.EndsWith(_metaExtension))
                     file = reference.Substring(0, reference.Length - _metaExtension.Length);
 
-                UnityEngine.Debug.Log(
-                    $"{refGuid}: {reference}", AssetDatabase.LoadMainAssetAtPath(file)
-                );
+                UnityEngine.Debug.Log(reference, AssetDatabase.LoadMainAssetAtPath(file));
             }
 
-            String log = $"<b><color=#FF5522>Cost {totalTime}s,";
-            log += $" {references.Count} reference{(references.Count > 2 ? "s" : "")} found for";
-            log += $" object: \"{obj.name}\" path: \"{path}\" guid: \"{guid}\"</color></b>\n";
+            Int32 count = references.Count;
+            String log = $"Cost {totalTime}s, {count} reference{(count > 2 ? "s" : "")} found for";
+            log += $" \"{obj.name}\" [{path}, {guid}]";
 
-            UnityEngine.Debug.Log(log + output, obj);
+            UnityEngine.Debug.Log($"<b><color=#FF5522>{log}</color></b>", obj);
+
+            String errorLog = errors.ToString();
+            if (String.IsNullOrEmpty(errorLog) == false)
+                UnityEngine.Debug.Log($"Errors when finding references:\n{errorLog}");
         }
     }
 }
