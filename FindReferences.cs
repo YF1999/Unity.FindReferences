@@ -20,7 +20,7 @@ public static class FindReferences
     private static readonly Double _waitSeconds = _isOSX ? 2 : 300;
 
     private static readonly String _program =
-        _isOSX ? "/usr/bin/mdfind" : Path.Combine(Environment.CurrentDirectory, "Tools\\rg.exe");
+        _isOSX ? "/usr/bin/mdfind" : $"{Environment.CurrentDirectory}\\Tools\\rg.exe";
 
     private static readonly String _arguments =
         _isOSX ? $"-onlyin {_dataPath} {{0}}"
@@ -163,11 +163,11 @@ public static class FindReferences
                 );
             }
 
-            String log = $"<color=#DD00AA>Cost {totalTime}s,";
+            String log = $"<b><color=#FF5522>Cost {totalTime}s,";
             log += $" {references.Count} reference{(references.Count > 2 ? "s" : "")} found for";
-            log += $" object: \"{obj.name}\" path: \"{path}\" guid: \"{guid}\"</color>\n{output}";
+            log += $" object: \"{obj.name}\" path: \"{path}\" guid: \"{guid}\"</color></b>\n";
 
-            UnityEngine.Debug.Log(log, obj);
+            UnityEngine.Debug.Log(log + output, obj);
         }
     }
 }
