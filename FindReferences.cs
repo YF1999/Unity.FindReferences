@@ -3,38 +3,54 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Text;
 using System.Threading;
 using UnityEditor;
 using UnityEngine;
 
+/// <summary>Not Support mac yet.</summary>
 public static class FindReferences
 {
     private const String _menuItemName = "Assets/Find References In Project #&f";
     private const String _metaExtension = ".meta";
 
+    private static readonly Int32 _platform =
+        Application.platform == RuntimePlatform.WindowsEditor ? 0 : 1;
+
     private static readonly String _dataPath = Application.dataPath;
+    private static readonly String[] _program =
+        {
+            $"{_dataPath}/Scripts/Tools/.rg-win.exe",   // win
+            $"{_dataPath}/Scripts/Tools/.rg-mac"        // mac
+        };
+    private static readonly String[] _preprocessor =
+        {
+            $"{_dataPath}/Scripts/Tools/.rgxxdwin.bat", // win
+            $"{_dataPath}/Scripts/Tools/.rgxxdmac"      // mac
+        };
 
-    private static readonly Boolean _isOSX = Application.platform == RuntimePlatform.OSXEditor;
-    private static readonly Double _waitSeconds = _isOSX ? 2 : 300;
-
-    private static readonly String _program =
-        _isOSX ? "/usr/bin/mdfind" : $"{Environment.CurrentDirectory}\\Tools\\rg.exe";
-
-    private static readonly String _arguments =
-        _isOSX ? $"-onlyin {_dataPath} {{0}}"
-            : String.Join(" ",
-                "--case-sensitive",
-                "--files-with-matches",
-                "--fixed-strings",
-                "--follow",
-                $"--ignore-file Assets\\Tools\\Unity.FindReferences\\.rgIgnore",
-                "--no-text",
+    /// <summary>0 means text search, 1 means binary search.</summary>
+    private static Int32 _searchMode = 1;
+    private static readonly String[] _arguments =
+        {
+            String.Join(" ",
+                "--files-with-matches --fixed-strings --follow",
+                $"--ignore-file {_dataPath}/Scripts/Tools/.rgIgnore",
                 "--regexp {0}",
                 $"--threads {Environment.ProcessorCount}",
                 $"-- {_dataPath}"
-            );
+            ),
+            String.Join(" ",
+                "--files-with-matches --fixed-strings --follow",
+                $"--ignore-file {_dataPath}/Scripts/Tools/.rgIgnore",
+                "--regexp {0}",
+                $"--pre {_preprocessor[_platform]}",
+                $"--threads {Environment.ProcessorCount}",
+                $"-- {_dataPath}"
+            )
+        };
+
+    private static readonly Double _waitSeconds = _searchMode == 0 ? 60 : 600;
 
     [MenuItem(_menuItemName, true)]
     private static Boolean FindValidate()
@@ -70,9 +86,9 @@ public static class FindReferences
             {
                 StartInfo = new ProcessStartInfo
                 {
-                    Arguments = String.Format(_arguments, guid),
+                    Arguments = String.Format(_arguments[_searchMode], guid),
                     CreateNoWindow = true,
-                    FileName = _program,
+                    FileName = _program[_platform],
                     RedirectStandardError = true,
                     RedirectStandardOutput = true,
                     UseShellExecute = false     // needed to be false to redirect io streams
