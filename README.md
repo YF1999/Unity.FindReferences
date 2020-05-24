@@ -12,7 +12,7 @@ For asset serialization, Support text mode and binary mode, will support mixed m
 ## Install
 
 - Windows
-    - Just clone this repository into `Assets/Tools` directory.
+    - Just clone this repository into `Assets/References` directory.
 - MacOS
     - Not support MacOS yet, I do not have a Mac.
 - Linux

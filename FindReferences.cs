@@ -23,13 +23,13 @@ public static class FindReferences
     private static readonly String _dataPath = Application.dataPath;
     private static readonly String[] _program =
         {
-            $"{_dataPath}/Tools/Unity.FindReferences/.rg-win.exe",   // win
-            $"{_dataPath}/Tools/Unity.FindReferences/.rg-mac"        // HACK: mac
+            $"{_dataPath}/References/Unity.FindReferences/.rg-win.exe",   // win
+            $"{_dataPath}/References/Unity.FindReferences/.rg-mac"        // HACK: mac
         };
     private static readonly String[] _preprocessor =
         {
-            $"{_dataPath}/Tools/Unity.FindReferences/.rgxxdwin.bat", // win
-            $"{_dataPath}/Tools/Unity.FindReferences/.rgxxdmac"      // HACK: mac
+            $"{_dataPath}/References/Unity.FindReferences/.rgxxdwin.bat", // win
+            $"{_dataPath}/References/Unity.FindReferences/.rgxxdmac"      // HACK: mac
         };
 
     /// <summary>
@@ -40,14 +40,14 @@ public static class FindReferences
         {
             String.Join(" ",
                 "--files-with-matches --fixed-strings --follow",
-                $"--ignore-file {_dataPath}/Tools/Unity.FindReferences/.rgIgnore",
+                $"--ignore-file {_dataPath}/References/Unity.FindReferences/.rgIgnore",
                 "--regexp {0}",
                 $"--threads {Environment.ProcessorCount}",
                 $"-- {_dataPath}"
             ),
             String.Join(" ",
                 "--files-with-matches --fixed-strings --follow",
-                $"--ignore-file {_dataPath}/Tools/Unity.FindReferences/.rgIgnore",
+                $"--ignore-file {_dataPath}/References/Unity.FindReferences/.rgIgnore",
                 "--regexp {0}",
                 $"--pre {_preprocessor[_platform]}",
                 $"--threads {Environment.ProcessorCount}",
