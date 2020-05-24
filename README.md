@@ -2,20 +2,21 @@
 
 Find asset references in Unity projects by using ripgrep.
 
+For asset serialization, Support text mode and binary mode, will support mixed mode in future.
+
 ## Usage
 
 - Select asset in Project view and then press keyboard shortcut `Alt+Shfit+F`.
 - Right click asset in Project view, then select `Find References In Project` in popup menu.
 
 ## Install
-### Windows
 
-1. Clone this repository into `Assets/Tools` directory.
-2. Download `ripgrep` from [Latest release · BurntSushi/ripgrep](https://github.com/BurntSushi/ripgrep/releases/latest) and extract `rg.exe` to `[PathToYourUnityProject]/Tools` directory.
-
-### macOS
-
-- Just clone this repository into `Assets/Tools` directory, no other dependencies needed.
+- Windows
+    - Just clone this repository into `Assets/Tools` directory.
+- MacOS
+    - Not support MacOS yet, I do not have a Mac.
+- Linux
+    - Not support Linux yet.
 
 ## About ripgrep
 
