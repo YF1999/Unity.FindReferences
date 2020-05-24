@@ -1,6 +1,6 @@
 # Unity.FindReferences
 
-Find asset references in Unity projects by using ripgrep.
+Find asset references in Unity projects by using ripgrep and xxd.
 
 For asset serialization, Support text mode and binary mode, will support mixed mode in future.
 
