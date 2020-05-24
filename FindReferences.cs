@@ -14,6 +14,9 @@ public static class FindReferences
     private const String _menuItemName = "Assets/Find References In Project #&f";
     private const String _metaExtension = ".meta";
 
+    /// <summary>
+    /// 0 means windows platform, 1 means macosx platform.
+    /// </summary>
     private static readonly Int32 _platform =
         Application.platform == RuntimePlatform.WindowsEditor ? 0 : 1;
 
@@ -21,15 +24,17 @@ public static class FindReferences
     private static readonly String[] _program =
         {
             $"{_dataPath}/Scripts/Tools/.rg-win.exe",   // win
-            $"{_dataPath}/Scripts/Tools/.rg-mac"        // mac
+            $"{_dataPath}/Scripts/Tools/.rg-mac"        // HACK: mac
         };
     private static readonly String[] _preprocessor =
         {
             $"{_dataPath}/Scripts/Tools/.rgxxdwin.bat", // win
-            $"{_dataPath}/Scripts/Tools/.rgxxdmac"      // mac
+            $"{_dataPath}/Scripts/Tools/.rgxxdmac"      // HACK: mac
         };
 
-    /// <summary>0 means text search, 1 means binary search.</summary>
+    /// <summary>
+    /// 0 means text search, 1 means binary search.
+    /// </summary>
     private static Int32 _searchMode = 1;
     private static readonly String[] _arguments =
         {
@@ -74,13 +79,33 @@ public static class FindReferences
 
         List<String> references = new List<String>();
         StringBuilder errors = new StringBuilder();
+        Double totalTime = 0;
 
-        Double totalTime = RunProcess();
+        ReverseGuid();
+        RunProcess();
         Output();
 
         // ---------- Local Functions
 
-        Double RunProcess()
+        void ReverseGuid()
+        {
+            Int32 length = guid.Length;
+            Char[] guidchr = new Char[length];
+
+            // length = 32
+
+            for (Int32 i = 0; i < length; i += 4)
+            {
+                guidchr[i] = guid[i + 1];
+                guidchr[i + 1] = guid[i];
+                guidchr[i + 2] = guid[i + 3];
+                guidchr[i + 3] = guid[i + 2];
+            }
+
+            guid = new String(guidchr);
+        }
+
+        void RunProcess()
         {
             Process process = new Process
             {
@@ -135,7 +160,7 @@ public static class FindReferences
             EditorUtility.ClearProgressBar();
             stopwatch.Stop();
 
-            return stopwatch.ElapsedMilliseconds / 1000d;
+            totalTime = stopwatch.ElapsedMilliseconds / 1000d;
         }
 
         void OutputDataReceived(System.Object sender, DataReceivedEventArgs eventArgs)
