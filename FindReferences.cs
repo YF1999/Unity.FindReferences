@@ -3,38 +3,59 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Text;
 using System.Threading;
 using UnityEditor;
 using UnityEngine;
 
+/// <summary>Not Support mac yet.</summary>
 public static class FindReferences
 {
     private const String _menuItemName = "Assets/Find References In Project #&f";
     private const String _metaExtension = ".meta";
 
+    /// <summary>
+    /// 0 means windows platform, 1 means macosx platform.
+    /// </summary>
+    private static readonly Int32 _platform =
+        Application.platform == RuntimePlatform.WindowsEditor ? 0 : 1;
+
     private static readonly String _dataPath = Application.dataPath;
+    private static readonly String[] _program =
+        {
+            $"{_dataPath}/Tools/Unity.FindReferences/.rg-win.exe",   // win
+            $"{_dataPath}/Tools/Unity.FindReferences/.rg-mac"        // HACK: mac
+        };
+    private static readonly String[] _preprocessor =
+        {
+            $"{_dataPath}/Tools/Unity.FindReferences/.rgxxdwin.bat", // win
+            $"{_dataPath}/Tools/Unity.FindReferences/.rgxxdmac"      // HACK: mac
+        };
 
-    private static readonly Boolean _isOSX = Application.platform == RuntimePlatform.OSXEditor;
-    private static readonly Double _waitSeconds = _isOSX ? 2 : 300;
-
-    private static readonly String _program =
-        _isOSX ? "/usr/bin/mdfind" : $"{Environment.CurrentDirectory}\\Tools\\rg.exe";
-
-    private static readonly String _arguments =
-        _isOSX ? $"-onlyin {_dataPath} {{0}}"
-            : String.Join(" ",
-                "--case-sensitive",
-                "--files-with-matches",
-                "--fixed-strings",
-                "--follow",
-                $"--ignore-file Assets\\Tools\\Unity.FindReferences\\.rgIgnore",
-                "--no-text",
+    /// <summary>
+    /// 0 means text search, 1 means binary search.
+    /// </summary>
+    private static Int32 _searchMode = 1;
+    private static readonly String[] _arguments =
+        {
+            String.Join(" ",
+                "--files-with-matches --fixed-strings --follow",
+                $"--ignore-file {_dataPath}/Tools/Unity.FindReferences/.rgIgnore",
                 "--regexp {0}",
                 $"--threads {Environment.ProcessorCount}",
                 $"-- {_dataPath}"
-            );
+            ),
+            String.Join(" ",
+                "--files-with-matches --fixed-strings --follow",
+                $"--ignore-file {_dataPath}/Tools/Unity.FindReferences/.rgIgnore",
+                "--regexp {0}",
+                $"--pre {_preprocessor[_platform]}",
+                $"--threads {Environment.ProcessorCount}",
+                $"-- {_dataPath}"
+            )
+        };
+
+    private static readonly Double _waitSeconds = _searchMode == 0 ? 60 : 600;
 
     [MenuItem(_menuItemName, true)]
     private static Boolean FindValidate()
@@ -58,21 +79,41 @@ public static class FindReferences
 
         List<String> references = new List<String>();
         StringBuilder errors = new StringBuilder();
+        Double totalTime = 0;
 
-        Double totalTime = RunProcess();
+        ReverseGuid();
+        RunProcess();
         Output();
 
         // ---------- Local Functions
 
-        Double RunProcess()
+        void ReverseGuid()
+        {
+            Int32 length = guid.Length;
+            Char[] guidchr = new Char[length];
+
+            // length = 32
+
+            for (Int32 i = 0; i < length; i += 4)
+            {
+                guidchr[i] = guid[i + 1];
+                guidchr[i + 1] = guid[i];
+                guidchr[i + 2] = guid[i + 3];
+                guidchr[i + 3] = guid[i + 2];
+            }
+
+            guid = new String(guidchr);
+        }
+
+        void RunProcess()
         {
             Process process = new Process
             {
                 StartInfo = new ProcessStartInfo
                 {
-                    Arguments = String.Format(_arguments, guid),
+                    Arguments = String.Format(_arguments[_searchMode], guid),
                     CreateNoWindow = true,
-                    FileName = _program,
+                    FileName = _program[_platform],
                     RedirectStandardError = true,
                     RedirectStandardOutput = true,
                     UseShellExecute = false     // needed to be false to redirect io streams
@@ -119,7 +160,7 @@ public static class FindReferences
             EditorUtility.ClearProgressBar();
             stopwatch.Stop();
 
-            return stopwatch.ElapsedMilliseconds / 1000d;
+            totalTime = stopwatch.ElapsedMilliseconds / 1000d;
         }
 
         void OutputDataReceived(System.Object sender, DataReceivedEventArgs eventArgs)

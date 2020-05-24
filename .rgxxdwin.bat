@@ -1,0 +1,1 @@
+Assets\Scripts\Tools\.xxd-win -c 67108864 -p - -
