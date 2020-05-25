@@ -1,1 +1,1 @@
-Assets\References\Unity.FindReferences\.xxd-win -c 67108864 -p - -
+Assets\Dependencies\Unity.FindReferences\.xxd-win -c 67108864 -p - -
