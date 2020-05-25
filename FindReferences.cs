@@ -1,3 +1,10 @@
+/* ------------------------------------------------------------------------------------------------
+ * Copyright (c) 2020 YF1999
+ * Copyright (c) 2018 NETWORM
+ * Copyright (c) 2016 Jesse Ringrose
+ * Licensed under the MIT License. See LICENSE in the project root for license information.
+ * --------------------------------------------------------------------------------------------- */
+
 #if UNITY_EDITOR
 
 using System;
